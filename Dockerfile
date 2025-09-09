@@ -31,7 +31,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   xdg-utils \
   libxss1 \
   libgbm1 \
-  ca-certificates \
   wget \
   git \
   && rm -rf /var/lib/apt/lists/*
@@ -47,10 +46,14 @@ RUN apt-get update && apt-get install -y chromium \
 
 # Create app dir
 WORKDIR /app
-COPY package.json package-lock.json* ./ || true
+
+# Copy package files (both package.json and package-lock.json if present)
+COPY package*.json ./
+
+# Copy the rest of the project
 COPY . .
 
-# Install dependencies
+# Install dependencies (try npm ci, fall back to npm install)
 RUN npm ci --production || npm install --production
 
 # Expose port (Render will set PORT env)
